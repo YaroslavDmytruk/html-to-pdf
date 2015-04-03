@@ -4,7 +4,10 @@ var child_process = require('child_process'),
     debug = false,
     inputEncoding = null,
     outputEncoding = null;
-
+var path = require('path');
+var tmp = require('temporary');
+var tmp_dir = new tmp.Dir().path;
+console.log(tmp_dir);
 exports.setDebug = function (newDebug) {
     debug = newDebug;
 };
@@ -19,15 +22,16 @@ exports.setOutputEncoding = function(enc) {
 
 exports.convertHTMLString = function (html, pdfPath, callback) {
     var self = this, uniqueID = UUIDGenerator.v4();
-    fs.writeFile(uniqueID + '.html', html, function (err) {
+    var target = path.join(tmp_dir, uniqueID + '.html');
+    fs.writeFile(target, html, function (err) {
         if (err) {
             callback(err)
         } else {
-            self.convertHTMLFile(uniqueID + '.html', pdfPath, function (error, results) {
+            self.convertHTMLFile(target, pdfPath, function (error, results) {
                 if (error) {
                     callback(error);
                 } else {
-                    fs.unlink(uniqueID + '.html', function (deleteError) {
+                    fs.unlink(target, function (deleteError) {
                         if (deleteError) {
                             callback(deleteError);
                         } else {
@@ -49,7 +53,7 @@ exports.convertHTMLFile = function (htmlPath, pdfPath, callback) {
         args.push('--output-encoding', outputEncoding);
     }
     args.push(htmlPath, pdfPath);
-    var renderer = child_process.spawn('java', args);
+    var renderer = child_process.spawn('java', args, {cwd: tmp_dir});
     renderer.on('error', function (error) {
         callback(error);
     });

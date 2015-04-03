@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/ChaosEvoker/html-to-pdf",
   "dependencies": {
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "temporary": "0.0.8"
   }
 }
